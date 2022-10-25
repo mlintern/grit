@@ -220,11 +220,11 @@ class Grit
   # Perform a git task in current working directory.  repo_name is only for output reporting.
   ###
   def perform(git_task, repo_name)
-    puts '-' * 80
+    puts "-" * 80
     puts "# #{repo_name.upcase} -- git #{git_task}" unless repo_name.nil?
     puts `git #{git_task}`
-    puts '-' * 80
-    puts ''
+    puts "-" * 80
+    puts ""
   end
 
   ###
@@ -233,16 +233,16 @@ class Grit
   def proceed(args)
     config = load_config
 
-    git_task = args.map { |x| x.include?(' ') ? "\"#{x}\"" : x }.join(' ')
+    git_task = args.map { |x| x.include?(" ") ? "\"#{x}\"" : x }.join(" ")
 
-    config['repositories'].each do |repo|
-      if repo['path'].nil? || !File.exist?(repo['path'])
-        puts "Can't find repository: #{repo['path']}"
+    config["repositories"].each do |repo|
+      if repo["path"].nil? || !File.exist?(repo["path"])
+        puts "Can't find repository: #{repo["path"]}"
         next
       end
 
-      Dir.chdir(repo['path']) do |_d|
-        perform(git_task, repo['name'])
+      Dir.chdir(repo["path"]) do |_d|
+        perform(git_task, repo["name"])
       end
     end
   end
@@ -250,25 +250,25 @@ end
 
 grit = Grit.new
 case ARGV[0]
-when 'help'
+when "help"
   grit.help
-when 'init'
+when "init"
   grit.initialize_grit(ARGV[1..-1])
 when /add-(repo|repository)/
   grit.add_repository(ARGV[1..-1])
-when 'add-all'
+when "add-all"
   grit.add_all_repositories
-when 'config'
+when "config"
   grit.display_config
-when 'clean-config'
+when "clean-config"
   grit.clean_config
-when 'convert-config'
+when "convert-config"
   grit.convert_config
-when 'destroy'
+when "destroy"
   grit.destroy(ARGV[1..-1])
 when /(rm|remove)-(repo|repository)/
   grit.remove_repository(ARGV[1])
-when 'on'
+when "on"
   grit.perform_on(ARGV[1], ARGV[2..-1])
 when /version|-v|--version/
   puts grit.version
