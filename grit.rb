@@ -10,7 +10,7 @@ require "fileutils"
 
 # Grit Class
 class Grit
-  VERSION = "2021.1.19"
+  VERSION = "2022.10.25"
 
   def version
     VERSION
@@ -29,6 +29,7 @@ class Grit
     puts " convert-config                - convert conf from sym to string"
     puts " add-repository <name> <dir>   - add repo and dir to config.yml"
     puts " remove-repository <name>      - remove specified repo from config.yml"
+    puts " reset                         - reset current grit setup to the initial config"
     puts " destroy                       - delete current grit setup including config and .grit directory"
     puts " on <repo> <action>            - execute git action on specific repo"
     puts " version                       - get current grit version\n\n"
@@ -37,8 +38,8 @@ class Grit
   ###
   # Create .grit dir and config.yml file
   ###
-  def initialize_grit(args)
-    location = args[0] || Dir.pwd
+  def initialize_grit
+    location = Dir.pwd
 
     if File.directory?(location)
       directory = File.join(location, ".grit")
@@ -59,10 +60,18 @@ class Grit
   end
 
   ###
+  # Reset .grit dir and config.yml
+  ###
+  def reset
+    destroy
+    initialize_grit
+  end
+
+  ###
   # Remove .grit dir and config.yml
   ###
-  def destroy(args)
-    location = args[0] || Dir.pwd
+  def destroy
+    location = Dir.pwd
     directory = File.join(location, ".grit")
 
     if File.directory?(directory)
@@ -228,7 +237,7 @@ class Grit
   end
 
   ###
-  # Perform git task on all respoitories in the config list
+  # Perform git task on all repositories in the config list
   ###
   def proceed(args)
     config = load_config
@@ -253,7 +262,7 @@ case ARGV[0]
 when "help"
   grit.help
 when "init"
-  grit.initialize_grit(ARGV[1..-1])
+  grit.initialize_grit
 when /add-(repo|repository)/
   grit.add_repository(ARGV[1..-1])
 when "add-all"
@@ -264,8 +273,10 @@ when "clean-config"
   grit.clean_config
 when "convert-config"
   grit.convert_config
+when "reset"
+  grit.reset
 when "destroy"
-  grit.destroy(ARGV[1..-1])
+  grit.destroy
 when /(rm|remove)-(repo|repository)/
   grit.remove_repository(ARGV[1])
 when "on"
