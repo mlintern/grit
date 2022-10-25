@@ -5,12 +5,12 @@
 # Grit is a way to manage multiple repos in a git repository seamlessly using the git CLI tools
 ###
 
-require 'yaml'
-require 'fileutils'
+require "yaml"
+require "fileutils"
 
 # Grit Class
 class Grit
-  VERSION = '2021.1.19'
+  VERSION = "2021.1.19"
 
   def version
     VERSION
@@ -21,16 +21,16 @@ class Grit
   ###
   def help
     puts "OPTIONS:\n\n"
-    puts ' help                          - display list of commands'
-    puts ' init <dir> (optional)         - create grit config.yml file in .grit dir'
-    puts ' add-all                       - add all directories in the current directory to config.yml'
-    puts ' config                        - show current config settings'
-    puts ' clean-config                  - remove any missing direcotries from config.yml'
-    puts ' convert-config                - convert conf from sym to string'
-    puts ' add-repository <name> <dir>   - add repo and dir to config.yml'
-    puts ' remove-repository <name>      - remove specified repo from config.yml'
-    puts ' destroy                       - delete current grit setup including config and .grit directory'
-    puts ' on <repo> <action>            - execute git action on specific repo'
+    puts " help                          - display list of commands"
+    puts " init <dir> (optional)         - create grit config.yml file in .grit dir"
+    puts " add-all                       - add all directories in the current directory to config.yml"
+    puts " config                        - show current config settings"
+    puts " clean-config                  - remove any missing direcotries from config.yml"
+    puts " convert-config                - convert conf from sym to string"
+    puts " add-repository <name> <dir>   - add repo and dir to config.yml"
+    puts " remove-repository <name>      - remove specified repo from config.yml"
+    puts " destroy                       - delete current grit setup including config and .grit directory"
+    puts " on <repo> <action>            - execute git action on specific repo"
     puts " version                       - get current grit version\n\n"
   end
 
@@ -41,17 +41,17 @@ class Grit
     location = args[0] || Dir.pwd
 
     if File.directory?(location)
-      directory = File.join(location, '.grit')
+      directory = File.join(location, ".grit")
       FileUtils.mkdir(directory) unless File.directory?(directory)
 
-      config_file = directory + '/config.yml'
+      config_file = directory + "/config.yml"
       unless File.exist?(config_file)
         config = {}
-        config['root'] ||= location
-        config['repositories'] ||= []
-        config['ignore_root'] = true
+        config["root"] ||= location
+        config["repositories"] ||= []
+        config["ignore_root"] = true
 
-        File.open(directory + '/config.yml', 'w') { |f| YAML.dump(config, f) }
+        File.open(directory + "/config.yml", 'w') { |f| YAML.dump(config, f) }
       end
     else
       puts "Directory doesn't exist!"
@@ -63,14 +63,14 @@ class Grit
   ###
   def destroy(args)
     location = args[0] || Dir.pwd
-    directory = File.join(location, '.grit')
+    directory = File.join(location, ".grit")
 
     if File.directory?(directory)
-      puts 'Are you sure? (y/n): '
+      puts "Are you sure? (y/n): "
       input = $stdin.gets.strip
-      exit unless input.downcase == 'y'
+      exit unless input.downcase == "y"
 
-      File.delete(directory + '/config.yml')
+      File.delete(directory + "/config.yml")
       Dir.delete(directory)
       puts "Grit configuration files have been removed from #{location}"
     else
@@ -82,14 +82,14 @@ class Grit
   # Return current config as json
   ###
   def load_config
-    config = File.open(File.join(FileUtils.pwd, '.grit/config.yml')) { |f| YAML.safe_load(f) }
-    config['repositories'].unshift('name' => 'Root', 'path' => config['root']) unless config['ignore_root']
+    config = File.open(File.join(FileUtils.pwd, ".grit/config.yml")) { |f| YAML.safe_load(f) }
+    config["repositories"].unshift("name" => "Root", "path" => config["root"]) unless config["ignore_root"]
     config
   rescue Psych::DisallowedClass
     puts 'Could not load config.  Probably need to perform a `grit convert-config` to string names'
     exit 1
   rescue Errno::ENOENT
-    puts 'Could not load config.  Are you sure this is a grit directory?'
+    puts "Could not load config.  Are you sure this is a grit directory?"
     exit 1
   end
 
@@ -97,7 +97,7 @@ class Grit
   # Write config, passed in config as json, to disk as yaml
   ###
   def write_config(config)
-    File.open(File.join(FileUtils.pwd, '.grit/config.yml'), 'w') { |f| YAML.dump(config, f) }
+    File.open(File.join(FileUtils.pwd, ".grit/config.yml"), 'w') { |f| YAML.dump(config, f) }
   end
 
   ###
@@ -112,12 +112,12 @@ class Grit
   # Convert config yaml from symbols to strings
   ###
   def convert_config
-    original_config = File.read(File.join(FileUtils.pwd, '.grit/config.yml'))
-    new_config = YAML.safe_load(original_config.gsub(':repositories:', 'repositories:')
-                                               .gsub(':root:', 'root:')
-                                               .gsub(':ignore_root:', 'ignore_root:')
-                                               .gsub(':name:', 'name:')
-                                               .gsub(':path:', 'path:'))
+    original_config = File.read(File.join(FileUtils.pwd, ".grit/config.yml"))
+    new_config = YAML.safe_load(original_config.gsub(":repositories:", "repositories:")
+                                               .gsub(":root:", "root:")
+                                               .gsub(":ignore_root:", "ignore_root:")
+                                               .gsub(":name:", "name:")
+                                               .gsub(":path:", "path:"))
     new_config.to_yaml
     write_config(new_config)
   end
@@ -132,8 +132,8 @@ class Grit
 
     git_dir = path + '/.git'
     if File.exist?(git_dir)
-      config['repositories'] = [] if config['repositories'].nil?
-      config['repositories'].push('name' => name, 'path' => path)
+      config["repositories"] = [] if config["repositories"].nil?
+      config["repositories"].push("name" => name, "path" => path)
       write_config(config)
       puts "Added #{name} repo located #{path}"
     else
@@ -149,13 +149,13 @@ class Grit
 
     directories = Dir.entries('.').select
     directories.each do |repo|
-      next if repo == '.grit'
+      next if repo == ".grit"
 
       git_dir = './' + repo + '/.git'
       next unless File.exist?(git_dir)
 
       puts "Adding #{repo}"
-      config['repositories'].push('name' => repo, 'path' => repo)
+      config["repositories"].push("name" => repo, "path" => repo)
     end
     write_config(config)
   end
@@ -166,10 +166,10 @@ class Grit
   def clean_config
     config = load_config
 
-    original_repositories = config['repositories']
-    config['repositories'] = original_repositories.delete_if do |repo|
-      git_dir = './' + repo['path'] + '/.git'
-      true if repo['path'].nil? || !File.directory?(repo['path']) || !File.exist?(git_dir)
+    original_repositories = config["repositories"]
+    config["repositories"] = original_repositories.delete_if do |repo|
+      git_dir = './' + repo["path"] + '/.git'
+      true if repo["path"].nil? || !File.directory?(repo["path"]) || !File.exist?(git_dir)
     end
     write_config(config)
   end
@@ -179,7 +179,7 @@ class Grit
   ###
   def get_repository(name)
     config = load_config
-    config['repositories'].detect { |f| f['name'] == name }
+    config["repositories"].detect { |f| f["name"] == name }
   end
 
   ###
@@ -187,15 +187,15 @@ class Grit
   ###
   def perform_on(repo_name, args)
     repo = get_repository(repo_name)
-    args = args.join(' ') unless args.class == String
+    args = args.join(" ") unless args.class == String
 
-    if repo.nil? || repo['path'].nil? || !File.exist?(repo['path'])
+    if repo.nil? || repo["path"].nil? || !File.exist?(repo["path"])
       puts "Can't find repository: #{repo_name}"
       abort
     end
 
-    Dir.chdir(repo['path']) do |_d|
-      perform(args, repo['name'])
+    Dir.chdir(repo["path"]) do |_d|
+      perform(args, repo["name"])
     end
   end
 
@@ -207,8 +207,8 @@ class Grit
 
     match = get_repository(name.to_s)
     if match.nil?
-      puts 'Could not find repository'
-    elsif config['repositories'].delete(match)
+      puts "Could not find repository"
+    elsif config["repositories"].delete(match)
       write_config(config)
       puts "Removed repository #{name} from grit"
     else
