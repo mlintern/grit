@@ -1,5 +1,5 @@
 # Grit
-Grit is just a simple mapping tool to align your multiple repositories. It's just a proxy for git cli commands to your main repo and your other repos. It does not create/delete repositories.  It will only manage what is in your `.grit/config`.
+Grit is just a simple mapping tool to align your multiple repositories. It's just a proxy for git cli commands to your main repository and your other repositories. It does not create/delete repositories.  It will only manage what is in your `.grit/config`.
 
 ## Grits Goals
 
@@ -7,32 +7,32 @@ Grit is just a simple mapping tool to align your multiple repositories. It's jus
 * Not get in the way
 * Allow the user to make the normal git choices
 
-## Getting started:
-Clone the repo and put the executable in your PATH
-```
+## Getting started
+Clone the repository and put the executable in your PATH
+```bash
 git clone https://github.com/mlintern/grit.git ~/.grit
 ln -s ~/.grit/grit.rb /usr/local/bin/grit
 ```
 
-### Creating a new project:
-```
+### Creating a new project
+```bash
 [master][~/proj-root]$ grit init
 ```
 
 ### Add current git directories
-```
+```bash
 [master][~/proj-root]$ grit add-all
 ```
 
 ### Add new git directory
-```
+```bash
 [master][~/proj-root]$ grit add-repository <name/dir> <dir (optional)>
 ```
 
 Will generate .grit/config.yml
 
 ## Sample config.yml
-```
+```yaml
 ---
 root: /Users/jbond/proj-root
 repositories:
@@ -43,7 +43,7 @@ repositories:
 ignore_root: false
 ```
 ### Command Options
-```
+```bash
 OPTIONS:
 
   help                         - display list of commands
@@ -59,9 +59,9 @@ OPTIONS:
   version                      - get current grit version
 ```
 
-### Executing Commands:
+### Executing Commands
 grit status
-```
+```bash
 [master][~/proj-root]$ grit status
 Performing operation status on Root
 # On branch master
@@ -78,9 +78,9 @@ Performing operation status on Skyfall
 nothing to commit (working directory clean)
 ```
 
-### Executing on a Single Repoository
-grit on REPO_NAME_CASE GIT_OPERATION will perform that operation on the repo you want
-```
+### Executing on a Single Repository
+grit on REPO_NAME_CASE GIT_OPERATION will perform that operation on the repository you want
+```bash
 [master][~/proj-root]$ grit on spectre status
 --------------------------------------------------------------------------------
 # SPECTRE -- git status
@@ -93,12 +93,12 @@ nothing to commit, working tree clean
 
 ### Cleanup Grit Project
 grit destroy will remove the .grit directory and config
-```
+```bash
 [master][~/proj-root]$ grit destroy
 ```
 
 ### Might want to add .grit/ to global gitignore file
-```
+```bash
 git config --global core.excludesfile ~/.gitignore
 echo ".grit/" >> ~/.gitignore
 ```
