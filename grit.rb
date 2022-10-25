@@ -51,7 +51,7 @@ class Grit
         config["repositories"] ||= []
         config["ignore_root"] = true
 
-        File.open(directory + "/config.yml", 'w') { |f| YAML.dump(config, f) }
+        File.open(directory + "/config.yml", "w") { |f| YAML.dump(config, f) }
       end
     else
       puts "Directory doesn't exist!"
@@ -86,7 +86,7 @@ class Grit
     config["repositories"].unshift("name" => "Root", "path" => config["root"]) unless config["ignore_root"]
     config
   rescue Psych::DisallowedClass
-    puts 'Could not load config.  Probably need to perform a `grit convert-config` to string names'
+    puts "Could not load config.  Probably need to perform a `grit convert-config` to string names"
     exit 1
   rescue Errno::ENOENT
     puts "Could not load config.  Are you sure this is a grit directory?"
@@ -97,7 +97,7 @@ class Grit
   # Write config, passed in config as json, to disk as yaml
   ###
   def write_config(config)
-    File.open(File.join(FileUtils.pwd, ".grit/config.yml"), 'w') { |f| YAML.dump(config, f) }
+    File.open(File.join(FileUtils.pwd, ".grit/config.yml"), "w") { |f| YAML.dump(config, f) }
   end
 
   ###
@@ -130,7 +130,7 @@ class Grit
     name = args[0]
     path = args[1] || args[0]
 
-    git_dir = path + '/.git'
+    git_dir = path + "/.git"
     if File.exist?(git_dir)
       config["repositories"] = [] if config["repositories"].nil?
       config["repositories"].push("name" => name, "path" => path)
@@ -147,11 +147,11 @@ class Grit
   def add_all_repositories
     config = load_config
 
-    directories = Dir.entries('.').select
+    directories = Dir.entries(".").select
     directories.each do |repo|
       next if repo == ".grit"
 
-      git_dir = './' + repo + '/.git'
+      git_dir = "./" + repo + "/.git"
       next unless File.exist?(git_dir)
 
       puts "Adding #{repo}"
@@ -168,7 +168,7 @@ class Grit
 
     original_repositories = config["repositories"]
     config["repositories"] = original_repositories.delete_if do |repo|
-      git_dir = './' + repo["path"] + '/.git'
+      git_dir = "./" + repo["path"] + "/.git"
       true if repo["path"].nil? || !File.directory?(repo["path"]) || !File.exist?(git_dir)
     end
     write_config(config)
