@@ -85,9 +85,9 @@ class Grit
         File.open(directory + "/config.yml", "w") { |f| YAML.dump(config, f) }
       end
 
-      config_file = directory + "/history.log"
+      history_file = directory + "/history.log"
       unless File.exist?(history_file)
-        history = File.write(File.join(FileUtils.pwd, ".grit/history.log"), "init" , mode: 'a+')
+        File.write(history_file, "")
       end
     else
       puts "Directory doesn't exist!"
@@ -294,7 +294,9 @@ end
 
 grit = Grit.new
 
-grit.append_history(ARGV)
+unless ARGV[0] == 'init'
+  grit.append_history(ARGV)
+end
 
 case ARGV[0]
 when "help"
