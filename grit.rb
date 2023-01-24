@@ -46,8 +46,8 @@ class Grit
     unless File.exist?(history_file)
       File.write(history_file, "")
     end
-    now = DateTime.now.strftime('[%Y-%m-%d %H:%M:%S]')
-    File.write(history_file, now + " grit " + record.join(' ') + "\n", mode: 'a+')
+    now = DateTime.now.strftime("[%Y-%m-%d %H:%M:%S]")
+    File.write(history_file, now + " grit " + record.join(" ") + "\n", mode: "a+")
   end
 
   ###
@@ -294,7 +294,7 @@ end
 
 grit = Grit.new
 
-unless ARGV[0] == 'init'
+unless ARGV[0] == "init"
   grit.append_history(ARGV)
 end
 
