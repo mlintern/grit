@@ -7,6 +7,7 @@
 
 require "yaml"
 require "fileutils"
+require "date"
 
 # Grit Class
 class Grit
@@ -21,18 +22,47 @@ class Grit
   ###
   def help
     puts "OPTIONS:\n\n"
-    puts " help                          - display list of commands"
-    puts " init <dir> (optional)         - create grit config.yml file in .grit dir"
     puts " add-all                       - add all directories in the current directory to config.yml"
+    puts " add-repository <name> <dir>   - add repo and dir to config.yml"
     puts " config                        - show current config settings"
     puts " clean-config                  - remove any missing direcotries from config.yml"
+    puts " clean-history                 - clear entries from history.log file"
     puts " convert-config                - convert conf from sym to string"
-    puts " add-repository <name> <dir>   - add repo and dir to config.yml"
+    puts " destroy                       - delete current grit setup including config and .grit directory"
+    puts " help                          - display list of commands"
+    puts " history                       - display history of grit requiests in this directory"
+    puts " init <dir> (optional)         - create grit config.yml file in .grit dir"
     puts " remove-repository <name>      - remove specified repo from config.yml"
     puts " reset                         - reset current grit setup to the initial config"
-    puts " destroy                       - delete current grit setup including config and .grit directory"
     puts " on <repo> <action>            - execute git action on specific repo"
     puts " version                       - get current grit version\n\n"
+  end
+
+  ###
+  # Append command to history file
+  ###
+  def append_history(record)
+    history_file = File.join(FileUtils.pwd, ".grit/history.log")
+    unless File.exist?(history_file)
+      File.write(history_file, "")
+    end
+    now = DateTime.now.strftime('[%Y-%m-%d %H:%M:%S]')
+    File.write(history_file, now + " grit " + record.join(' ') + "\n", mode: 'a+')
+  end
+
+  ###
+  # Display history of grit commands
+  ###
+  def display_history
+    history = IO.read(File.join(FileUtils.pwd, ".grit/history.log"))
+    puts history
+  end
+
+  ###
+  # Clear  history file
+  ###
+  def clear_history
+    File.write(File.join(FileUtils.pwd, ".grit/history.log"), "")
   end
 
   ###
@@ -53,6 +83,11 @@ class Grit
         config["ignore_root"] = true
 
         File.open(directory + "/config.yml", "w") { |f| YAML.dump(config, f) }
+      end
+
+      config_file = directory + "/history.log"
+      unless File.exist?(history_file)
+        history = File.write(File.join(FileUtils.pwd, ".grit/history.log"), "init" , mode: 'a+')
       end
     else
       puts "Directory doesn't exist!"
@@ -258,9 +293,16 @@ class Grit
 end
 
 grit = Grit.new
+
+grit.append_history(ARGV)
+
 case ARGV[0]
 when "help"
   grit.help
+when "history"
+  grit.display_history
+when "clear-history"
+  grit.clear_history
 when "init"
   grit.initialize_grit
 when /add-(repo|repository)/
