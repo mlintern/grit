@@ -318,10 +318,10 @@ when "clear-history"
   grit.clear_history
 when "init"
   grit.initialize_grit
-when /add(-)?(repo|repository)?/
-  grit.add_repository(ARGV[1..-1])
 when "add-all"
   grit.add_all_repositories
+when /add(-)?(repo|repository)?/
+  grit.add_repository(ARGV[1..-1])
 when "config"
   grit.display_config
 when "clean-config"
