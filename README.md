@@ -119,4 +119,4 @@ git config --global core.excludesfile ~/.gitignore
 echo ".grit/" >> ~/.gitignore
 ```
 
-Updated: 2023.1.24
+Updated: 2023.3.2

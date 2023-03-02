@@ -11,7 +11,7 @@ require "date"
 
 # Grit Class
 class Grit
-  VERSION = "2022.10.25"
+  VERSION = "2023.3.2"
 
   def version
     VERSION
@@ -23,7 +23,7 @@ class Grit
   def help
     puts "OPTIONS:\n\n"
     puts " add-all                       - add all directories in the current directory to config.yml"
-    puts " add-repository <name> <dir>   - add repo and dir to config.yml"
+    puts " add-repository <name> <dir>   - add repo and dir to config.yml.  (add, add-repo)"
     puts " config                        - show current config settings"
     puts " clean-config                  - remove any missing direcotries from config.yml"
     puts " clean-history                 - clear entries from history.log file"
@@ -32,10 +32,16 @@ class Grit
     puts " help                          - display list of commands"
     puts " history                       - display history of grit requiests in this directory"
     puts " init <dir> (optional)         - create grit config.yml file in .grit dir"
-    puts " remove-repository <name>      - remove specified repo from config.yml"
+    puts " remove-repository <name>      - remove specified repo from config.yml, (rm-repo, rm-repository, remove-repo)"
     puts " reset                         - reset current grit setup to the initial config"
     puts " on <repo> <action>            - execute git action on specific repo"
     puts " version                       - get current grit version\n\n"
+  end
+
+  def are_you_sure
+    puts "Are you sure? (y/n): "
+    input = $stdin.gets.strip
+    exit unless input.downcase == "y"
   end
 
   ###
@@ -65,6 +71,17 @@ class Grit
     File.write(File.join(FileUtils.pwd, ".grit/history.log"), "")
   end
 
+  def init_config
+    location = Dir.pwd
+    directory = File.join(location, ".grit")
+    config = {}
+    config["root"] ||= location
+    config["repositories"] ||= []
+    config["ignore_root"] = true
+
+    File.open(directory + "/config.yml", "w") { |f| YAML.dump(config, f) }
+  end
+
   ###
   # Create .grit dir and config.yml file
   ###
@@ -77,12 +94,7 @@ class Grit
 
       config_file = directory + "/config.yml"
       unless File.exist?(config_file)
-        config = {}
-        config["root"] ||= location
-        config["repositories"] ||= []
-        config["ignore_root"] = true
-
-        File.open(directory + "/config.yml", "w") { |f| YAML.dump(config, f) }
+        init_config
       end
 
       history_file = directory + "/history.log"
@@ -98,8 +110,8 @@ class Grit
   # Reset .grit dir and config.yml
   ###
   def reset
-    destroy
-    initialize_grit
+    are_you_sure
+    init_config
   end
 
   ###
@@ -110,11 +122,10 @@ class Grit
     directory = File.join(location, ".grit")
 
     if File.directory?(directory)
-      puts "Are you sure? (y/n): "
-      input = $stdin.gets.strip
-      exit unless input.downcase == "y"
+      are_you_sure
 
       File.delete(directory + "/config.yml")
+      File.delete(directory + "/history.log")
       Dir.delete(directory)
       puts "Grit configuration files have been removed from #{location}"
     else
@@ -307,7 +318,7 @@ when "clear-history"
   grit.clear_history
 when "init"
   grit.initialize_grit
-when /add-(repo|repository)/
+when /add(-)?(repo|repository)?/
   grit.add_repository(ARGV[1..-1])
 when "add-all"
   grit.add_all_repositories
