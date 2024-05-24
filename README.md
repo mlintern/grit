@@ -119,4 +119,12 @@ git config --global core.excludesfile ~/.gitignore
 echo ".grit/" >> ~/.gitignore
 ```
 
-Updated: 2023.3.2
+## Troubleshooting
+
+### Make sure parallel is installed
+
+```sh
+gem install parallel
+```
+
+Updated: 2024.5.24
