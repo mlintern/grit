@@ -242,6 +242,13 @@ class Grit
   end
 
   ###
+  # Check if directory is Grit Directory
+  ###
+  def is_grit_dir()
+    return File.exist?(".grit")
+  end
+
+  ###
   # Perform a git task on a specific repository
   ###
   def perform_on(repo_name, args)
@@ -311,6 +318,11 @@ class Grit
 end
 
 grit = Grit.new
+
+if !grit.is_grit_dir()
+  puts "This is not a GRIT directory."
+  exit 1
+end
 
 unless ARGV[0] == "init"
   grit.append_history(ARGV)
