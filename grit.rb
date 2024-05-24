@@ -8,10 +8,14 @@
 require "yaml"
 require "fileutils"
 require "date"
+require "subprocess"
+require "parallel"
 
 # Grit Class
 class Grit
-  VERSION = "2023.3.2"
+  VERSION = "2024.5.24"
+  THREAD_COUNT = 8
+  DASH_COUNT = 40
 
   def version
     VERSION
@@ -25,12 +29,12 @@ class Grit
     puts " add-all                       - add all directories in the current directory to config.yml"
     puts " add-repository <name> <dir>   - add repo and dir to config.yml.  (add, add-repo)"
     puts " config                        - show current config settings"
-    puts " clean-config                  - remove any missing direcotries from config.yml"
+    puts " clean-config                  - remove any missing directories from config.yml"
     puts " clean-history                 - clear entries from history.log file"
     puts " convert-config                - convert conf from sym to string"
     puts " destroy                       - delete current grit setup including config and .grit directory"
     puts " help                          - display list of commands"
-    puts " history                       - display history of grit requiests in this directory"
+    puts " history                       - display history of grit requests in this directory"
     puts " init <dir> (optional)         - create grit config.yml file in .grit dir"
     puts " remove-repository <name>      - remove specified repo from config.yml, (rm-repo, rm-repository, remove-repo)"
     puts " reset                         - reset current grit setup to the initial config"
@@ -275,11 +279,16 @@ class Grit
   # Perform a git task in current working directory.  repo_name is only for output reporting.
   ###
   def perform(git_task, repo_name)
-    puts "-" * 80
-    puts "# #{repo_name.upcase} -- git #{git_task}" unless repo_name.nil?
-    puts `git #{git_task}`
-    puts "-" * 80
-    puts ""
+    begin
+      output =  Subprocess.check_output(["git",git_task], cwd: repo_name)
+      puts "-" * DASH_COUNT
+      puts "# #{repo_name.upcase} -- git #{git_task}" unless repo_name.nil?
+      puts output
+      puts "-" * DASH_COUNT
+      puts ""
+    rescue Subprocess::NonZeroExit => e
+      puts e.message
+    end
   end
 
   ###
@@ -290,15 +299,13 @@ class Grit
 
     git_task = args.map { |x| x.include?(" ") ? "\"#{x}\"" : x }.join(" ")
 
-    config["repositories"].each do |repo|
+    Parallel.each(config["repositories"], in_threads: THREAD_COUNT) do |repo|
       if repo["path"].nil? || !File.exist?(repo["path"])
         puts "Can't find repository: #{repo["path"]}"
         next
       end
 
-      Dir.chdir(repo["path"]) do |_d|
-        perform(git_task, repo["name"])
-      end
+      perform(git_task, repo["name"])
     end
   end
 end
