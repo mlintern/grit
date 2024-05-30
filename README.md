@@ -121,10 +121,10 @@ echo ".grit/" >> ~/.gitignore
 
 ## Troubleshooting
 
-### Make sure parallel is installed
+### Make sure parallel and subprocess are installed
 
 ```sh
-gem install parallel
+gem install parallel subprocess
 ```
 
-Updated: 2024.5.24
+Updated: 2024.5.29

@@ -13,7 +13,7 @@ require "parallel"
 
 # Grit Class
 class Grit
-  VERSION = "2024.5.24"
+  VERSION = "2024.5.29"
   THREAD_COUNT = 8
   DASH_COUNT = 40
 
