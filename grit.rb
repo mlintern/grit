@@ -14,7 +14,7 @@ require "parallel"
 # Grit Class
 class Grit
   VERSION = "2024.5.24"
-  THREAD_COUNT = 8
+  THREAD_COUNT = $GRIT_THREAD_COUNT || 8
   DASH_COUNT = 40
 
   def version
