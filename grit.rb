@@ -319,7 +319,7 @@ end
 
 grit = Grit.new
 
-if !grit.is_grit_dir()
+if !grit.is_grit_dir() && ARGV[0] != "init"
   puts "This is not a GRIT directory."
   exit 1
 end
