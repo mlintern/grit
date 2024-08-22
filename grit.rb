@@ -13,8 +13,8 @@ require "parallel"
 
 # Grit Class
 class Grit
-  VERSION = "2024.6.6"
-  THREAD_COUNT = $GRIT_THREAD_COUNT || 8
+  VERSION = "2024.8.21"
+  THREAD_COUNT = ENV["GRIT_THREAD_COUNT"] || 8
   DASH_COUNT = 40
 
   def version
@@ -40,6 +40,7 @@ class Grit
     puts " reset                         - reset current grit setup to the initial config"
     puts " on <repo> <action>            - execute git action on specific repo"
     puts " version                       - get current grit version\n\n"
+    puts " THREAD_COUNT: " + THREAD_COUNT.to_s
   end
 
   def are_you_sure
@@ -306,7 +307,7 @@ class Grit
 
     git_task = args.map { |x| x.include?(" ") ? "\"#{x}\"" : x }.join(" ")
 
-    Parallel.each(config["repositories"], in_threads: THREAD_COUNT) do |repo|
+    Parallel.each(config["repositories"], in_threads: THREAD_COUNT.to_i) do |repo|
       if repo["path"].nil? || !File.exist?(repo["path"])
         puts "Can't find repository: #{repo["path"]}"
         next
@@ -319,7 +320,7 @@ end
 
 grit = Grit.new
 
-if !grit.is_grit_dir() && ARGV[0] != "init"
+if !grit.is_grit_dir() && ARGV[0] != "init" && ARGV[0] != "help"
   puts "This is not a GRIT directory."
   exit 1
 end
