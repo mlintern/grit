@@ -13,7 +13,7 @@ require "parallel"
 
 # Grit Class
 class Grit
-  VERSION = "2024.8.22"
+  VERSION = "2024.9.3"
   THREAD_COUNT = ENV["GRIT_THREAD_COUNT"] || 8
   DASH_COUNT = 40
 
@@ -208,7 +208,7 @@ class Grit
     config = load_config
 
     directories = Dir.entries(".").select
-    directories.each do |repo|
+    directories.sort.each do |repo|
       next if repo == ".grit"
 
       git_dir = "./" + repo + "/.git"
