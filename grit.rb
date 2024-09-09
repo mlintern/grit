@@ -291,13 +291,9 @@ class Grit
     footer = "-" * DASH_COUNT + "\n\n"
     begin
       output =  Subprocess.check_output(["git",git_task], cwd: repo_name)
-      puts header
-      puts output
-      puts footer
+      puts header + "\n" + output + footer
     rescue Subprocess::NonZeroExit => e
-      puts header
-      puts e.message
-      puts footer
+      puts header + "\n" + e.message + "\n" + footer
     end
   end
 
