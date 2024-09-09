@@ -13,7 +13,7 @@ require "parallel"
 
 # Grit Class
 class Grit
-  VERSION = "2024.9.3"
+  VERSION = "2024.9.9"
   THREAD_COUNT = ENV["GRIT_THREAD_COUNT"] || 8
   DASH_COUNT = 40
 
@@ -287,17 +287,17 @@ class Grit
   # Perform a git task in current working directory.  repo_name is only for output reporting.
   ###
   def perform(git_task, repo_name)
+    header = "-" * DASH_COUNT + "\n" + "# #{repo_name.upcase} -- git #{git_task}" unless repo_name.nil?
+    footer = "-" * DASH_COUNT + "\n\n"
     begin
-      puts "-" * DASH_COUNT
-      puts "# #{repo_name.upcase} -- git #{git_task}" unless repo_name.nil?
       output =  Subprocess.check_output(["git",git_task], cwd: repo_name)
+      puts header
       puts output
-      puts "-" * DASH_COUNT
-      puts ""
+      puts footer
     rescue Subprocess::NonZeroExit => e
+      puts header
       puts e.message
-      puts "-" * DASH_COUNT
-      puts ""
+      puts footer
     end
   end
 
