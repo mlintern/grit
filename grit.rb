@@ -40,7 +40,8 @@ class Grit
     puts " reset                         - reset current grit setup to the initial config"
     puts " on <repo> <action>            - execute git action on specific repo"
     puts " version                       - get current grit version\n\n"
-    puts " THREAD_COUNT: " + THREAD_COUNT.to_s
+    puts "Environent Variables:\n\n"
+    puts " GRIT_THREAD_COUNT: " + THREAD_COUNT.to_s
   end
 
   def are_you_sure
@@ -323,7 +324,7 @@ if !grit.is_grit_dir() && ARGV[0] != "init" && ARGV[0] != "help"
   exit 1
 end
 
-unless ARGV[0] == "init"
+unless ARGV[0] == "init" || ARGV[0] == "help" || ARGV[0] == "history"
   grit.append_history(ARGV)
 end
 
