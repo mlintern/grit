@@ -13,7 +13,7 @@ require 'parallel'
 
 # Grit Class
 class Grit
-  VERSION = '2024.9.9'
+  VERSION = '2024.10.1'
   THREAD_COUNT = ENV['GRIT_THREAD_COUNT'] || 8
   DASH_COUNT = 40
 
