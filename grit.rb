@@ -13,7 +13,7 @@ require "parallel"
 
 # Grit Class
 class Grit
-  VERSION = "2024.9.9"
+  VERSION = "2024.10.1"
   THREAD_COUNT = ENV["GRIT_THREAD_COUNT"] || 8
   DASH_COUNT = 40
 
@@ -41,7 +41,7 @@ class Grit
     puts " on <repo> <action>            - execute git action on specific repo"
     puts " version                       - get current grit version\n\n"
     puts "Environent Variables:\n\n"
-    puts " GRIT_THREAD_COUNT: " + THREAD_COUNT.to_s
+    puts " GRIT_THREAD_COUNT: #{THREAD_COUNT}"
   end
 
   def are_you_sure
@@ -55,11 +55,9 @@ class Grit
   ###
   def append_history(record)
     history_file = File.join(FileUtils.pwd, ".grit/history.log")
-    unless File.exist?(history_file)
-      File.write(history_file, "")
-    end
+    File.write(history_file, "") unless File.exist?(history_file)
     now = DateTime.now.strftime("[%Y-%m-%d %H:%M:%S]")
-    File.write(history_file, now + " grit " + record.join(" ") + "\n", mode: "a+")
+    File.write(history_file, "#{now} grit #{record.join(' ')}\n", mode: "a+")
   end
 
   ###
@@ -85,7 +83,7 @@ class Grit
     config["repositories"] ||= []
     config["ignore_root"] = true
 
-    File.open(directory + "/config.yml", "w") { |f| YAML.dump(config, f) }
+    File.open("#{directory}/config.yml", "w") { |f| YAML.dump(config, f) }
   end
 
   ###
@@ -98,15 +96,11 @@ class Grit
       directory = File.join(location, ".grit")
       FileUtils.mkdir(directory) unless File.directory?(directory)
 
-      config_file = directory + "/config.yml"
-      unless File.exist?(config_file)
-        init_config
-      end
+      config_file = "#{directory}/config.yml"
+      init_config unless File.exist?(config_file)
 
-      history_file = directory + "/history.log"
-      unless File.exist?(history_file)
-        File.write(history_file, "")
-      end
+      history_file = "#{directory}/history.log"
+      File.write(history_file, "") unless File.exist?(history_file)
     else
       puts "Directory doesn't exist!"
     end
@@ -130,8 +124,8 @@ class Grit
     if File.directory?(directory)
       are_you_sure
 
-      File.delete(directory + "/config.yml")
-      File.delete(directory + "/history.log")
+      File.delete("#{directory}/config.yml")
+      File.delete("#{directory}/history.log")
       Dir.delete(directory)
       puts "Grit configuration files have been removed from #{location}"
     else
@@ -191,7 +185,7 @@ class Grit
     name = args[0]
     path = args[1] || args[0]
 
-    git_dir = path + "/.git"
+    git_dir = "#{path}/.git"
     if File.exist?(git_dir)
       config["repositories"] = [] if config["repositories"].nil?
       config["repositories"].push("name" => name, "path" => path)
@@ -212,7 +206,7 @@ class Grit
     directories.sort.each do |repo|
       next if repo == ".grit"
 
-      git_dir = "./" + repo + "/.git"
+      git_dir = "./#{repo}/.git"
       next unless File.exist?(git_dir)
 
       puts "Adding #{repo}"
@@ -229,7 +223,7 @@ class Grit
 
     original_repositories = config["repositories"]
     config["repositories"] = original_repositories.delete_if do |repo|
-      git_dir = "./" + repo["path"] + "/.git"
+      git_dir = "./#{repo['path']}/.git"
       true if repo["path"].nil? || !File.directory?(repo["path"]) || !File.exist?(git_dir)
     end
     write_config(config)
@@ -246,8 +240,8 @@ class Grit
   ###
   # Check if directory is Grit Directory
   ###
-  def is_grit_dir()
-    return File.exist?(".grit")
+  def grit_dir?
+    File.exist?(".grit")
   end
 
   ###
@@ -255,7 +249,7 @@ class Grit
   ###
   def perform_on(repo_name, args)
     repo = get_repository(repo_name)
-    args = args.join(" ") unless args.class == String
+    args = args.join(" ") unless args.instance_of?(String)
 
     if repo.nil? || repo["path"].nil? || !File.exist?(repo["path"])
       puts "Can't find repository: #{repo_name}"
@@ -288,13 +282,13 @@ class Grit
   # Perform a git task in current working directory.  repo_name is only for output reporting.
   ###
   def perform(git_task, repo_name)
-    header = "-" * DASH_COUNT + "\n" + "# #{repo_name.upcase} -- git #{git_task}" unless repo_name.nil?
-    footer = "-" * DASH_COUNT + "\n\n"
+    header = "#{'-' * DASH_COUNT}\n# #{repo_name.upcase} -- git #{git_task}" unless repo_name.nil?
+    footer = "#{'-' * DASH_COUNT}\n\n"
     begin
-      output =  Subprocess.check_output(["git",git_task], cwd: repo_name)
-      puts header + "\n" + output + footer
+      output = Subprocess.check_output(["git", git_task], cwd: repo_name)
+      puts "#{header}\n#{output}#{footer}"
     rescue Subprocess::NonZeroExit => e
-      puts header + "\n" + e.message + "\n" + footer
+      puts "#{header}\n#{e.message}\n#{footer}"
     end
   end
 
@@ -308,7 +302,7 @@ class Grit
 
     Parallel.each(config["repositories"], in_threads: THREAD_COUNT.to_i) do |repo|
       if repo["path"].nil? || !File.exist?(repo["path"])
-        puts "Can't find repository: #{repo["path"]}"
+        puts "Can't find repository: #{repo['path']}"
         next
       end
 
@@ -319,14 +313,12 @@ end
 
 grit = Grit.new
 
-if !grit.is_grit_dir() && ARGV[0] != "init" && ARGV[0] != "help"
+if !grit.grit_dir? && ARGV[0] != "init" && ARGV[0] != "help"
   puts "This is not a GRIT directory."
   exit 1
 end
 
-unless ARGV[0] == "init" || ARGV[0] == "help" || ARGV[0] == "history"
-  grit.append_history(ARGV)
-end
+grit.append_history(ARGV) unless ARGV[0] == "init" || ARGV[0] == "help" || ARGV[0] == "history"
 
 case ARGV[0]
 when "help"
@@ -340,7 +332,7 @@ when "init"
 when "add-all"
   grit.add_all_repositories
 when /add(-)?(repo|repository)?/
-  grit.add_repository(ARGV[1..-1])
+  grit.add_repository(ARGV[1..])
 when "config"
   grit.display_config
 when "clean-config"
@@ -354,7 +346,7 @@ when "destroy"
 when /(rm|remove)-(repo|repository)/
   grit.remove_repository(ARGV[1])
 when "on"
-  grit.perform_on(ARGV[1], ARGV[2..-1])
+  grit.perform_on(ARGV[1], ARGV[2..])
 when /version|-v|--version/
   puts grit.version
 else
